@@ -87,8 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entryVideo) {
             // Morph as soon as video ends
             entryVideo.addEventListener('ended', startMorphAndFlight);
+
+            // Handle video loading errors immediately
+            entryVideo.addEventListener('error', () => {
+                console.warn('Video preloader failed to load, opening page immediately.');
+                startMorphAndFlight();
+            });
+
+            // Attempt to play the video and catch autoplay blockages (e.g. low-power mode or browser policies)
+            entryVideo.play().catch(err => {
+                console.warn('Video preloader autoplay was blocked:', err);
+                // Start fallback morph after a short 1s delay so the user isn't stuck on a blank screen
+                setTimeout(startMorphAndFlight, 1000);
+            });
             
-            // Fallback after 4.5 seconds in case video gets stuck or is blocked from playing
+            // Absolute fallback after 4.5 seconds in case video gets stuck or is blocked from playing
             setTimeout(startMorphAndFlight, 4500);
         } else {
             // Immediately start fallback if video doesn't exist
