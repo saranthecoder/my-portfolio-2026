@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Center | Saran Velmurugan</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style (Includes navigation headers matching index.html) -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <style>
+        /* Specific Styles for LinkedIn Feed layout */
+        .activity-feed-container {
+            max-width: 680px;
+            margin: 110px auto 60px;
+            padding: 0 15px;
+        }
+
+        .feed-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .feed-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .feed-header p {
+            color: var(--slate-gray);
+            font-size: 0.95rem;
+        }
+
+        .post-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .post-author-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-gray);
+        }
+
+        .author-info h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--dark-charcoal);
+            line-height: 1.2;
+        }
+
+        .author-info p {
+            font-size: 0.78rem;
+            color: var(--slate-gray);
+            line-height: 1.3;
+        }
+
+        .author-info .post-date {
+            font-size: 0.72rem;
+            color: var(--light-gray);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .post-text {
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Post Action Row */
+        .post-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--slate-gray);
+            border-bottom: 1px solid var(--border-gray);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+
+        .post-stats-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .like-icon-stack {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-orange);
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 0.55rem;
+        }
+
+        .post-actions-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .post-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--slate-gray);
+            font-family: var(--ff-primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .post-action-btn:hover {
+            background-color: var(--bg-offset);
+            color: var(--primary-orange);
+        }
+
+        .post-action-btn.liked {
+            color: var(--primary-orange);
+            animation: pulseLike 0.4s ease-out;
+        }
+
+
+
+        @keyframes pulseLike {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- MOBILE FEED OPTIMIZATIONS --- */
+        @media (max-width: 480px) {
+            .activity-feed-container {
+                margin-top: 80px;
+                margin-bottom: 40px;
+            }
+            .feed-header h1 {
+                font-size: 1.6rem;
+            }
+            .feed-header p {
+                font-size: 0.85rem;
+            }
+            .post-card {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            .post-author-bar {
+                margin-bottom: 10px;
+            }
+            .post-text {
+                font-size: 0.85rem;
+            }
+            .grid-1 .grid-img {
+                height: 180px;
+            }
+            .grid-2 .grid-img, .grid-3 .grid-img, .grid-4 .grid-img, .grid-more .grid-img {
+                height: 110px;
+            }
+            .grid-3, .grid-4 {
+                grid-template-rows: 110px;
+            }
+            .grid-3 .grid-img:first-child {
+                grid-row: span 1;
+            }
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .grid-more {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: 110px;
+            }
+            .grid-more .grid-img:first-child {
+                grid-column: span 1;
+            }
+            .post-actions-row {
+                justify-content: space-between;
+            }
+            .post-action-btn {
+                font-size: 0.78rem;
+                padding: 6px 8px;
+                gap: 4px;
+            }
+            .lightbox-close {
+                top: 20px;
+                right: 20px;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+    <!-- Background Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="SaranV Logo" class="logo-icon-img">
+                SaranV.<span class="tricolor-text">in</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html#home" class="nav-link">Home</a>
+                <a href="index.html#about" class="nav-link">About</a>
+                <a href="index.html#experience" class="nav-link">Experience</a>
+                <a href="index.html#skills" class="nav-link">Skills</a>
+                <a href="index.html#projects" class="nav-link">Projects</a>
+                <a href="index.html#contact" class="nav-link nav-btn">Let's Talk</a>
+            </nav>
+            <button class="mobile-nav-toggle" aria-label="Toggle menu" id="mobileMenuBtn">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNav">
+        <nav class="mobile-nav-links">
+            <a href="index.html#home" class="mobile-link">Home</a>
+            <a href="index.html#about" class="mobile-link">About</a>
+            <a href="index.html#experience" class="mobile-link">Experience</a>
+            <a href="index.html#skills" class="mobile-link">Skills</a>
+            <a href="index.html#projects" class="mobile-link">Projects</a>
+            <a href="index.html#contact" class="mobile-link mobile-btn">Let's Talk</a>
+        </nav>
+    </div>
+
+    <!-- LinkedIn Activity Feed -->
+    <div class="activity-feed-container">
+        <div class="feed-header">
+            <h1>Activity Center</h1>
+            <p>Recent professional activities, lectures, training highlights, and technology milestones</p>
+        </div>
+
+        <div id="postsFeed">
+            <!-- Loading Indicator -->
+            <p style="text-align: center; color: var(--slate-gray); padding: 40px 0;" id="feedLoader">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading recent activity...
+            </p>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightboxOverlay" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <button class="lightbox-nav-btn prev-btn" id="lightboxPrev" onclick="event.stopPropagation(); navigateLightbox(-1)" aria-label="Previous image"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img src="" id="lightboxImg" alt="Enlarged Post Media">
+        </div>
+        <button class="lightbox-nav-btn next-btn" id="lightboxNext" onclick="event.stopPropagation(); navigateLightbox(1)" aria-label="Next image"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Share Toast Notification -->
+    <div class="toast" id="toastMessage">Link copied to clipboard!</div>
+
+    <!-- JavaScript Controllers -->
+    <script>
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://your-production-backend.onrender.com';
+        
+        let profileData = null;
+        let loadedActivities = [];
+        let lightboxImages = [];
+        let currentLightboxIndex = 0;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchProfile();
+            await fetchActivities();
+            initParticles();
+            initMenuToggler();
+        });
+
+        // 1. Fetch Profile info (avatar picture)
+        async function fetchProfile() {
+            try {
+                const res = await fetch(`${API_BASE}/api/profile`);
+                if (res.ok) {
+                    profileData = await res.json();
+                }
+            } catch (err) {
+                console.error("Profile load error:", err);
+            }
+        }
+
+        // 2. Fetch all Activities
+        async function fetchActivities() {
+            const feedContainer = document.getElementById('postsFeed');
+            try {
+                const res = await fetch(`${API_BASE}/api/activities`);
+                if (res.ok) {
+                    const activities = await res.json();
+                    loadedActivities = activities;
+                    
+                    if (activities.length === 0) {
+                        feedContainer.innerHTML = '<p style="text-align:center; color:var(--slate-gray); padding:40px 0;">No activities posted yet. Check back soon!</p>';
+                        return;
+                    }
+
+                    feedContainer.innerHTML = '';
+                    activities.forEach(post => {
+                        feedContainer.appendChild(createPostCard(post));
+                        renderComments(post._id, post.comments || []);
+                    });
+
+                    // Deep-link scroll check
+                    const hash = window.location.hash;
+                    if (hash && hash.startsWith('#post-')) {
+                        const targetId = hash.substring(6);
+                        const targetEl = document.getElementById(`post-${targetId}`);
+                        if (targetEl) {
+                            setTimeout(() => {
+                                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                targetEl.style.transition = 'border-color 0.5s ease, box-shadow 0.5s ease';
+                                targetEl.style.borderColor = 'var(--primary-orange)';
+                                targetEl.style.boxShadow = '0 0 15px rgba(255, 90, 31, 0.4)';
+                                setTimeout(() => {
+                                    targetEl.style.borderColor = 'var(--border-gray)';
+                                    targetEl.style.boxShadow = 'var(--shadow-md)';
+                                }, 3000);
+                            }, 500);
+                        }
+                    }
+                } else {
+                    feedContainer.innerHTML = '<p style="text-align:center; color:var(--error-red); padding:40px 0;">Failed to load activities feed.</p>';
+                }
+            } catch (err) {
+                feedContainer.innerHTML = '<p style="text-align:center; color:var(--error-red); padding:40px 0;">Network error connecting to activities backend.</p>';
+            }
+        }
+
+        // 3. Render Post Card
+        function createPostCard(post) {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.id = `post-${post._id}`;
+            
+            // Format date
+            const dateObj = new Date(post.datePosted);
+            const formattedDate = dateObj.toLocaleDateString(undefined, { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+
+            // Author details
+            const name = profileData ? profileData.name : 'Saran Velmurugan';
+            const subtitle = "Full Stack Developer & Technical Trainer";
+            const avatarSrc = profileData && profileData.profilePicture 
+                ? (profileData.profilePicture.startsWith('/uploads') ? `${API_BASE}${profileData.profilePicture}` : profileData.profilePicture)
+                : 'profile.jpg';
+
+            // Compile image grid
+            let imagesMarkup = '';
+            const images = post.images || [];
+            if (images.length > 0) {
+                let gridClass = 'grid-1';
+                if (images.length === 2) gridClass = 'grid-2';
+                else if (images.length === 3) gridClass = 'grid-3';
+                else if (images.length === 4) gridClass = 'grid-4';
+                else if (images.length > 4) gridClass = 'grid-more';
+
+                const maxShow = 4;
+                imagesMarkup = `<div class="post-images-grid ${gridClass}">`;
+                images.forEach((imgUrl, idx) => {
+                    if (idx >= maxShow && gridClass === 'grid-more') return;
+                    
+                    const fullImgSrc = imgUrl.startsWith('/uploads') ? `${API_BASE}${imgUrl}` : imgUrl;
+                    const isLast = idx === maxShow - 1 && images.length > maxShow;
+
+                    imagesMarkup += `
+                        <div class="grid-img" onclick="openLightbox(${idx}, '${post._id}')">
+                            <img src="${fullImgSrc}" alt="Activity Media">
+                            ${isLast ? `<div class="more-overlay">+${images.length - maxShow}</div>` : ''}
+                        </div>
+                    `;
+                });
+                imagesMarkup += '</div>';
+            }
+
+            card.innerHTML = `
+                <div class="post-author-bar">
+                    <img src="${avatarSrc}" class="author-avatar" alt="${name}">
+                    <div class="author-info">
+                        <h3>${name}</h3>
+                        <p>${subtitle}</p>
+                        <span class="post-date">${formattedDate}</span>
+                    </div>
+                </div>
+                <div class="post-text">${post.description}</div>
+                ${imagesMarkup}
+                <div class="post-stats-row">
+                    <div class="post-stats-left">
+                        <span class="like-icon-stack"><i class="fa-solid fa-thumbs-up"></i></span>
+                        <span id="likes-count-${post._id}">${post.likesCount} likes</span>
+                    </div>
+                    <div>
+                        <span id="comments-count-${post._id}">${post.commentsCount || 0} comments</span>
+                    </div>
+                </div>
+                <div class="post-actions-row">
+                    <button class="post-action-btn" id="like-btn-${post._id}" onclick="likePost('${post._id}')">
+                        <i class="fa-regular fa-thumbs-up"></i> Like
+                    </button>
+                    <button class="post-action-btn" onclick="toggleComments('${post._id}')">
+                        <i class="fa-regular fa-comment-dots"></i> Comment
+                    </button>
+                    <button class="post-action-btn" onclick="sharePost('${post._id}')">
+                        <i class="fa-regular fa-paper-plane"></i> Share
+                    </button>
+                </div>
+                <div class="comments-section" id="comments-section-${post._id}" style="display: none; border-top: 1px solid var(--border-gray); padding-top: 15px; margin-top: 15px;">
+                    <div class="comments-list" id="comments-list-${post._id}">
+                        <!-- Comments will be populated dynamically -->
+                    </div>
+                    <form class="comment-form" onsubmit="submitComment(event, '${post._id}')">
+                        <div class="comment-form-row">
+                            <input type="text" placeholder="Your Name" id="comment-name-${post._id}" class="form-control-mini" required>
+                        </div>
+                        <div class="comment-form-row">
+                            <textarea placeholder="Add a comment..." id="comment-text-${post._id}" class="form-control-mini" rows="2" required></textarea>
+                            <button type="submit" class="btn btn-orange btn-mini" style="align-self: flex-end; width: auto; height: fit-content; padding: 10px 18px;"><i class="fa-solid fa-paper-plane"></i> Post</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return card;
+        }
+
+        // Like API Interaction
+        async function likePost(id) {
+            const btn = document.getElementById(`like-btn-${id}`);
+            if (btn.classList.contains('liked')) return; // Already liked locally
+
+            try {
+                const res = await fetch(`${API_BASE}/api/activities/${id}/like`, { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById(`likes-count-${id}`).textContent = `${data.likesCount} likes`;
+                    btn.classList.add('liked');
+                    btn.innerHTML = `<i class="fa-solid fa-thumbs-up"></i> Liked`;
+                }
+            } catch (err) {
+                console.error("Like request failed:", err);
+            }
+        }
+
+        // Comments toggle
+        function toggleComments(postId) {
+            const section = document.getElementById(`comments-section-${postId}`);
+            if (section) {
+                section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Render comments list
+        function renderComments(postId, comments) {
+            const list = document.getElementById(`comments-list-${postId}`);
+            if (!list) return;
+            list.innerHTML = '';
+            
+            if (!comments || comments.length === 0) {
+                list.innerHTML = '<p style="font-size: 0.75rem; color: var(--light-gray); text-align: center; padding: 10px 0;">No comments yet. Be the first to comment!</p>';
+                return;
+            }
+
+            comments.forEach(c => {
+                const date = new Date(c.dateReplied).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const item = document.createElement('div');
+                item.className = 'comment-item';
+                item.innerHTML = `
+                    <div class="comment-author-bar">
+                        <span class="comment-author-name">${c.name}</span>
+                        <span class="comment-date">${date}</span>
+                    </div>
+                    <div class="comment-text">${c.text}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Submit new comment
+        async function submitComment(e, postId) {
+            e.preventDefault();
+            const nameInput = document.getElementById(`comment-name-${postId}`);
+            const textInput = document.getElementById(`comment-text-${postId}`);
+            
+            const name = nameInput.value.trim();
+            const text = textInput.value.trim();
+
+            if (!name || !text) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/activities/${postId}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, text })
+                });
+
+                if (res.ok) {
+                    const updatedPost = await res.json();
+                    document.getElementById(`comments-count-${postId}`).textContent = `${updatedPost.commentsCount} comments`;
+                    renderComments(postId, updatedPost.comments);
+                    textInput.value = '';
+                    nameInput.value = '';
+                } else {
+                    showToast("Failed to post comment.");
+                }
+            } catch (err) {
+                console.error("Error submitting comment:", err);
+                showToast("Network error submitting comment.");
+            }
+        }
+
+        // Share Link helper
+        function sharePost(id) {
+            const shareUrl = `${window.location.origin}/activities.html#post-${id}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast("Post link copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy link.");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastMessage');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Hash change listener for deep links
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#post-')) {
+                const targetId = hash.substring(6);
+                const targetEl = document.getElementById(`post-${targetId}`);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetEl.style.transition = 'border-color 0.5s ease, box-shadow 0.5s ease';
+                    targetEl.style.borderColor = 'var(--primary-orange)';
+                    targetEl.style.boxShadow = '0 0 15px rgba(255, 90, 31, 0.4)';
+                    setTimeout(() => {
+                        targetEl.style.borderColor = 'var(--border-gray)';
+                        targetEl.style.boxShadow = 'var(--shadow-md)';
+                    }, 3000);
+                }
+            }
+        });
+
+        // --- Lightbox handler ---
+        function openLightbox(index, postId) {
+            const post = loadedActivities.find(p => p._id === postId);
+            if (!post || !post.images || post.images.length === 0) return;
+            
+            lightboxImages = post.images;
+            currentLightboxIndex = index;
+            updateLightboxImage();
+            
+            const overlay = document.getElementById('lightboxOverlay');
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const overlay = document.getElementById('lightboxOverlay');
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function navigateLightbox(direction) {
+            if (lightboxImages.length === 0) return;
+            currentLightboxIndex = (currentLightboxIndex + direction + lightboxImages.length) % lightboxImages.length;
+            updateLightboxImage();
+        }
+
+        function updateLightboxImage() {
+            const img = document.getElementById('lightboxImg');
+            const prevBtn = document.getElementById('lightboxPrev');
+            const nextBtn = document.getElementById('lightboxNext');
+            
+            if (img && lightboxImages[currentLightboxIndex]) {
+                const src = lightboxImages[currentLightboxIndex];
+                img.src = src.startsWith('/uploads') ? `${API_BASE}${src}` : src;
+            }
+            
+            if (prevBtn && nextBtn) {
+                if (lightboxImages.length <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                }
+            }
+        }
+
+        // --- Canvas background animation ---
+        function initParticles() {
+            const canvas = document.getElementById('particleCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            resize();
+            window.addEventListener('resize', resize);
+
+            class P {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.vx = (Math.random() - 0.5) * 0.4;
+                    this.vy = (Math.random() - 0.5) * 0.4;
+                }
+                draw() {
+                    ctx.fillStyle = 'rgba(255, 90, 31, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > canvas.width) this.vx = -this.vx;
+                    if (this.y < 0 || this.y > canvas.height) this.vy = -this.vy;
+                }
+            }
+
+            for (let i = 0; i < 40; i++) particles.push(new P());
+
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // --- Menu toggler ---
+        function initMenuToggler() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const nav = document.getElementById('mobileNav');
+            if (btn && nav) {
+                btn.addEventListener('click', () => {
+                    btn.classList.toggle('active');
+                    nav.classList.toggle('active');
+                    document.body.classList.toggle('no-scroll');
+                });
+                document.querySelectorAll('.mobile-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        btn.classList.remove('active');
+                        nav.classList.remove('active');
+                        document.body.classList.remove('no-scroll');
+                    });
+                });
+            }
+        }
+    </script>
+</body>
+</html>
