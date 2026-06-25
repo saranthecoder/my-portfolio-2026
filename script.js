@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://your-production-backend.onrender.com';
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://my-portfolio-2026-i0li.onrender.com';
 
     /* ==========================================================================
        0. INTRO PRELOADER & FLAG ANIMATION
@@ -251,77 +251,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     .catch(err => console.warn("GitHub API error:", err));
 
                 // Fetch LeetCode Stats
-                Promise.all([
-                    fetch(`https://alfa-leetcode-api.onrender.com/${leetcodeUser}/solved`).then(r => r.ok ? r.json() : null),
-                    fetch(`https://alfa-leetcode-api.onrender.com/${leetcodeUser}`).then(r => r.ok ? r.json() : null)
-                ])
-                .then(([solvedData, profileData]) => {
-                    if (solvedData) {
-                        // Total Solved Circle
-                        const solved = solvedData.solvedProblem || 0;
-                        // Approximate total Leetcode questions as denominators
-                        const totalQuestions = 3100;
-                        const totalEasy = 800;
-                        const totalMedium = 1600;
-                        const totalHard = 700;
+                fetch(`https://leetcode-stats-api.herokuapp.com/${leetcodeUser}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(lcData => {
+                        if (lcData && lcData.status === 'success') {
+                            // Total Solved Circle
+                            document.getElementById('leetcodeTotalSolved').textContent = lcData.totalSolved || '0';
+                            
+                            // Circle progress animation
+                            const circleFill = document.getElementById('leetcodeCircleFill');
+                            if (circleFill) {
+                                const percent = (lcData.totalSolved / lcData.totalQuestions) * 100 || 0;
+                                const radius = circleFill.r.baseVal.value || 50;
+                                const circumference = 2 * Math.PI * radius;
+                                circleFill.style.strokeDasharray = `${circumference}`;
+                                const offset = circumference - (percent / 100) * circumference;
+                                circleFill.style.strokeDashoffset = offset;
+                            }
 
-                        document.getElementById('leetcodeTotalSolved').textContent = solved;
-                        
-                        // Circle progress animation
-                        const circleFill = document.getElementById('leetcodeCircleFill');
-                        if (circleFill) {
-                            const percent = (solved / totalQuestions) * 100 || 0;
-                            const radius = circleFill.r.baseVal.value || 50;
-                            const circumference = 2 * Math.PI * radius;
-                            circleFill.style.strokeDasharray = `${circumference}`;
-                            const offset = circumference - (percent / 100) * circumference;
-                            circleFill.style.strokeDashoffset = offset;
-                        }
+                            // Easy bar
+                            document.getElementById('leetcodeEasyCount').textContent = `${lcData.easySolved} / ${lcData.totalEasy}`;
+                            const easyFill = document.getElementById('leetcodeEasyFill');
+                            if (easyFill) easyFill.style.width = `${(lcData.easySolved / lcData.totalEasy) * 100}%`;
 
-                        // Easy bar
-                        const easy = solvedData.easySolved || 0;
-                        document.getElementById('leetcodeEasyCount').textContent = `${easy} / ${totalEasy}`;
-                        const easyFill = document.getElementById('leetcodeEasyFill');
-                        if (easyFill) easyFill.style.width = `${(easy / totalEasy) * 100}%`;
+                            // Medium bar
+                            document.getElementById('leetcodeMediumCount').textContent = `${lcData.mediumSolved} / ${lcData.totalMedium}`;
+                            const mediumFill = document.getElementById('leetcodeMediumFill');
+                            if (mediumFill) mediumFill.style.width = `${(lcData.mediumSolved / lcData.totalMedium) * 100}%`;
 
-                        // Medium bar
-                        const medium = solvedData.mediumSolved || 0;
-                        document.getElementById('leetcodeMediumCount').textContent = `${medium} / ${totalMedium}`;
-                        const mediumFill = document.getElementById('leetcodeMediumFill');
-                        if (mediumFill) mediumFill.style.width = `${(medium / totalMedium) * 100}%`;
+                            // Hard bar
+                            document.getElementById('leetcodeHardCount').textContent = `${lcData.hardSolved} / ${lcData.totalHard}`;
+                            const hardFill = document.getElementById('leetcodeHardFill');
+                            if (hardFill) hardFill.style.width = `${(lcData.hardSolved / lcData.totalHard) * 100}%`;
 
-                        // Hard bar
-                        const hard = solvedData.hardSolved || 0;
-                        document.getElementById('leetcodeHardCount').textContent = `${hard} / ${totalHard}`;
-                        const hardFill = document.getElementById('leetcodeHardFill');
-                        if (hardFill) hardFill.style.width = `${(hard / totalHard) * 100}%`;
-
-                        // Acceptance Rate dynamically computed from acSubmissions / totalSubmissions
-                        let acceptanceRate = 0;
-                        const allAc = solvedData.acSubmissionNum && solvedData.acSubmissionNum.find(x => x.difficulty === 'All');
-                        const allTotal = solvedData.totalSubmissionNum && solvedData.totalSubmissionNum.find(x => x.difficulty === 'All');
-                        if (allAc && allTotal && allTotal.submissions > 0) {
-                            acceptanceRate = ((allAc.submissions / allTotal.submissions) * 100).toFixed(1);
+                            // Footer metrics
+                            document.getElementById('leetcodeRanking').textContent = lcData.ranking ? lcData.ranking.toLocaleString() : '-';
+                            document.getElementById('leetcodeAcceptance').textContent = lcData.acceptanceRate ? `${lcData.acceptanceRate}%` : '-';
+                            document.getElementById('leetcodeActiveStreak').textContent = lcData.contributionPoints ? lcData.contributionPoints.toLocaleString() : '-'; // Fallback to points as active indicator
                         } else {
-                            acceptanceRate = '52.4'; // standard fallback
+                            showLeetcodeError();
                         }
-                        document.getElementById('leetcodeAcceptance').textContent = `${acceptanceRate}%`;
-
-                        // Active submissions count instead of streak
-                        const totalSubsCount = allTotal ? allTotal.submissions : 490;
-                        document.getElementById('leetcodeActiveStreak').textContent = totalSubsCount.toLocaleString();
-                    } else {
+                    })
+                    .catch(err => {
+                        console.warn("Leetcode API error:", err);
                         showLeetcodeError();
-                    }
-
-                    if (profileData) {
-                        document.getElementById('leetcodeRanking').textContent = profileData.ranking ? profileData.ranking.toLocaleString() : '-';
-                    }
-                })
-                .catch(err => {
-                    console.warn("Leetcode API error:", err);
-                    showLeetcodeError();
-                });
+                    });
 
                 function showLeetcodeError() {
                     document.getElementById('leetcodeTotalSolved').textContent = 'N/A';
