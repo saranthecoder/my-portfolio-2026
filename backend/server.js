@@ -30,6 +30,40 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadsDir));
 
+// --- CACHING OPTIMIZATION ---
+const cache = {
+  profile: null,
+  stats: null,
+  experiences: null,
+  education: null,
+  skills: null,
+  projects: null,
+  testimonials: null,
+  activities: null
+};
+
+// Automatic cache invalidation middleware for successful mutations
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
+    const originalJson = res.json;
+    res.json = function (data) {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        const path = req.path;
+        if (path.startsWith('/api/profile')) cache.profile = null;
+        else if (path.startsWith('/api/stats')) cache.stats = null;
+        else if (path.startsWith('/api/experiences')) cache.experiences = null;
+        else if (path.startsWith('/api/education')) cache.education = null;
+        else if (path.startsWith('/api/skills')) cache.skills = null;
+        else if (path.startsWith('/api/projects')) cache.projects = null;
+        else if (path.startsWith('/api/activities')) cache.activities = null;
+        else if (path.startsWith('/api/testimonials')) cache.testimonials = null;
+      }
+      return originalJson.call(this, data);
+    };
+  }
+  next();
+});
+
 // Connect to MongoDB
 mongoose.connect(MONGO_URI)
   .then(() => console.log('Connected to MongoDB Database.'))
@@ -139,11 +173,13 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
 // Get Profile Settings
 app.get('/api/profile', async (req, res) => {
   try {
+    if (cache.profile) return res.json(cache.profile);
     let profile = await Profile.findOne({});
     if (!profile) {
       profile = new Profile();
       await profile.save();
     }
+    cache.profile = profile;
     res.json(profile);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -189,7 +225,9 @@ app.put('/api/profile', authenticateToken, upload.single('profilePictureFile'), 
 
 app.get('/api/stats', async (req, res) => {
   try {
+    if (cache.stats) return res.json(cache.stats);
     const stats = await Stat.find({});
+    cache.stats = stats;
     res.json(stats);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -231,7 +269,9 @@ app.delete('/api/stats/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/experiences', async (req, res) => {
   try {
+    if (cache.experiences) return res.json(cache.experiences);
     const experiences = await Experience.find({}).sort({ _id: 1 });
+    cache.experiences = experiences;
     res.json(experiences);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -299,7 +339,9 @@ app.delete('/api/experiences/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/education', async (req, res) => {
   try {
+    if (cache.education) return res.json(cache.education);
     const education = await Education.find({});
+    cache.education = education;
     res.json(education);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -341,7 +383,9 @@ app.delete('/api/education/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/skills', async (req, res) => {
   try {
+    if (cache.skills) return res.json(cache.skills);
     const skills = await Skill.find({});
+    cache.skills = skills;
     res.json(skills);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -374,7 +418,9 @@ app.delete('/api/skills/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/projects', async (req, res) => {
   try {
+    if (cache.projects) return res.json(cache.projects);
     const projects = await Project.find({});
+    cache.projects = projects;
     res.json(projects);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -448,8 +494,9 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/activities', async (req, res) => {
   try {
-    // Sort latest posts first
+    if (cache.activities) return res.json(cache.activities);
     const activities = await Activity.find({}).sort({ datePosted: -1 });
+    cache.activities = activities;
     res.json(activities);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -649,7 +696,9 @@ app.post('/api/testimonials', async (req, res) => {
 // Get Approved Testimonials (Public)
 app.get('/api/testimonials', async (req, res) => {
   try {
+    if (cache.testimonials) return res.json(cache.testimonials);
     const testimonials = await Testimonial.find({ approved: true }).sort({ createdAt: -1 });
+    cache.testimonials = testimonials;
     res.json(testimonials);
   } catch (err) {
     res.status(500).json({ error: err.message });

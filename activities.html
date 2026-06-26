@@ -305,8 +305,67 @@
 
     <!-- JavaScript Controllers -->
     <script>
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://your-production-backend.onrender.com';
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://my-portfolio-2026-i0li.onrender.com';
         
+        // Loader helper functions with request counter for concurrency
+        let activeFetchCount = 0;
+
+        function showAdminLoader(text = 'Processing request...') {
+            const loader = document.getElementById('submitLoader');
+            const loaderText = document.getElementById('submitLoaderText');
+            if (loader) {
+                if (loaderText) loaderText.textContent = text;
+                loader.classList.add('active');
+            }
+        }
+
+        function hideAdminLoader() {
+            if (activeFetchCount <= 0) {
+                const loader = document.getElementById('submitLoader');
+                if (loader) {
+                    loader.classList.remove('active');
+                }
+            }
+        }
+
+        // Global Fetch Interceptor for activities page
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const url = args[0] || '';
+            const options = args[1] || {};
+            const method = (options.method || 'GET').toUpperCase();
+            
+            // Bypass loader overlay for micro-interactions like likes
+            if (url.includes('/like')) {
+                return originalFetch(...args);
+            }
+            
+            // Determine friendly loader text
+            let text = 'Processing request...';
+            if (method === 'GET') {
+                if (url.includes('/profile')) text = 'Loading profile data...';
+                else if (url.includes('/activities')) text = 'Loading activities feed...';
+            } else if (method === 'POST') {
+                if (url.includes('/comments')) text = 'Posting your comment...';
+            }
+            
+            activeFetchCount++;
+            showAdminLoader(text);
+            
+            try {
+                const [response] = await Promise.all([
+                    originalFetch(...args),
+                    new Promise(resolve => setTimeout(resolve, 350))
+                ]);
+                return response;
+            } catch (error) {
+                throw error;
+            } finally {
+                activeFetchCount--;
+                hideAdminLoader();
+            }
+        };
+
         let profileData = null;
         let loadedActivities = [];
         let lightboxImages = [];
@@ -717,7 +776,16 @@
                     });
                 });
             }
-        }
     </script>
+
+    <!-- Submission Loader Overlay -->
+    <div class="submit-loader-overlay" id="submitLoader">
+        <div class="submit-loader-wrapper">
+            <div class="submit-loader-spinner"></div>
+            <img src="logo.png" alt="SaranV Logo" class="submit-loader-logo">
+        </div>
+        <div class="submit-loader-text" id="submitLoaderText">Processing request...</div>
+    </div>
 </body>
+
 </html>

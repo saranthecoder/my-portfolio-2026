@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://my-portfolio-2026-i0li.onrender.com';
 
+    // Initialize expand/collapse for static fallback skill cards
+    initializeSkillsExpandCollapse();
+
     /* ==========================================================================
        0. INTRO PRELOADER & FLAG ANIMATION
        ========================================================================== */
@@ -251,10 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     .catch(err => console.warn("GitHub API error:", err));
 
                 // Fetch LeetCode Stats
-                fetch(`https://leetcode-stats-api.herokuapp.com/${leetcodeUser}`)
+                fetch(`https://alfa-leetcode-api.onrender.com/userProfile/${leetcodeUser}`)
                     .then(r => r.ok ? r.json() : null)
                     .then(lcData => {
-                        if (lcData && lcData.status === 'success') {
+                        if (lcData && lcData.totalSolved !== undefined) {
                             // Total Solved Circle
                             document.getElementById('leetcodeTotalSolved').textContent = lcData.totalSolved || '0';
                             
@@ -270,24 +273,36 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
 
                             // Easy bar
-                            document.getElementById('leetcodeEasyCount').textContent = `${lcData.easySolved} / ${lcData.totalEasy}`;
+                            document.getElementById('leetcodeEasyCount').textContent = `${lcData.easySolved || 0} / ${lcData.totalEasy || 0}`;
                             const easyFill = document.getElementById('leetcodeEasyFill');
-                            if (easyFill) easyFill.style.width = `${(lcData.easySolved / lcData.totalEasy) * 100}%`;
+                            if (easyFill && lcData.totalEasy) easyFill.style.width = `${(lcData.easySolved / lcData.totalEasy) * 100}%`;
 
                             // Medium bar
-                            document.getElementById('leetcodeMediumCount').textContent = `${lcData.mediumSolved} / ${lcData.totalMedium}`;
+                            document.getElementById('leetcodeMediumCount').textContent = `${lcData.mediumSolved || 0} / ${lcData.totalMedium || 0}`;
                             const mediumFill = document.getElementById('leetcodeMediumFill');
-                            if (mediumFill) mediumFill.style.width = `${(lcData.mediumSolved / lcData.totalMedium) * 100}%`;
+                            if (mediumFill && lcData.totalMedium) mediumFill.style.width = `${(lcData.mediumSolved / lcData.totalMedium) * 100}%`;
 
                             // Hard bar
-                            document.getElementById('leetcodeHardCount').textContent = `${lcData.hardSolved} / ${lcData.totalHard}`;
+                            document.getElementById('leetcodeHardCount').textContent = `${lcData.hardSolved || 0} / ${lcData.totalHard || 0}`;
                             const hardFill = document.getElementById('leetcodeHardFill');
-                            if (hardFill) hardFill.style.width = `${(lcData.hardSolved / lcData.totalHard) * 100}%`;
+                            if (hardFill && lcData.totalHard) hardFill.style.width = `${(lcData.hardSolved / lcData.totalHard) * 100}%`;
 
                             // Footer metrics
                             document.getElementById('leetcodeRanking').textContent = lcData.ranking ? lcData.ranking.toLocaleString() : '-';
-                            document.getElementById('leetcodeAcceptance').textContent = lcData.acceptanceRate ? `${lcData.acceptanceRate}%` : '-';
-                            document.getElementById('leetcodeActiveStreak').textContent = lcData.contributionPoints ? lcData.contributionPoints.toLocaleString() : '-'; // Fallback to points as active indicator
+                            
+                            // Calculate acceptance rate
+                            let acceptanceRate = '-';
+                            if (lcData.matchedUserStats && lcData.matchedUserStats.acSubmissionNum && lcData.matchedUserStats.totalSubmissionNum) {
+                                const ac = lcData.matchedUserStats.acSubmissionNum.find(x => x.difficulty === 'All');
+                                const tot = lcData.matchedUserStats.totalSubmissionNum.find(x => x.difficulty === 'All');
+                                if (ac && tot && tot.submissions > 0) {
+                                    acceptanceRate = `${((ac.submissions / tot.submissions) * 100).toFixed(1)}%`;
+                                }
+                            }
+                            document.getElementById('leetcodeAcceptance').textContent = acceptanceRate;
+
+                            const points = lcData.contributionPoint ?? lcData.contributionPoints ?? 0;
+                            document.getElementById('leetcodeActiveStreak').textContent = points ? points.toLocaleString() : '-';
                         } else {
                             showLeetcodeError();
                         }
@@ -424,6 +439,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Frontend': 'fa-laptop-code',
                         'Backend': 'fa-server',
                         'Databases': 'fa-database',
+                        'Java Full Stack': 'fa-brands fa-java',
+                        'Python Full Stack': 'fa-brands fa-python',
+                        'MERN + GenAI': 'fa-solid fa-robot',
                         'DevOps & Tools': 'fa-cloud-arrow-up',
                         'UI/UX & Design': 'fa-bezier-curve',
                         'Engineering': 'fa-gears',
@@ -434,9 +452,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const card = document.createElement('div');
                         card.className = 'skill-category-card scroll-reveal fade-up tilt-target';
                         const icon = categoryIcons[cat] || 'fa-code';
+                        const iconClass = icon.includes(' ') ? icon : `fa-solid ${icon}`;
                         
                         card.innerHTML = `
-                            <div class="skill-card-icon"><i class="fa-solid ${icon} animate-icon"></i></div>
+                            <div class="skill-card-icon"><i class="${iconClass} animate-icon"></i></div>
                             <h3>${cat}</h3>
                             <div class="skill-badges">
                                 ${grouped[cat].map(skill => `<span>${skill}</span>`).join('')}
@@ -444,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                         grid.appendChild(card);
                     });
+                    initializeSkillsExpandCollapse();
                 }
             }
 
@@ -724,6 +744,41 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto';
     };
 
+    // Auto-open testimonial modal if write-testimonial=true query parameter is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('write-testimonial') === 'true' || window.location.hash === '#write-testimonial') {
+        setTimeout(() => {
+            const testimonialsSection = document.getElementById('testimonials');
+            if (testimonialsSection) {
+                testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            openReviewModal();
+        }, 800);
+    }
+
+    // Share Review Link functionality
+    const shareReviewLinkBtn = document.getElementById('shareReviewLinkBtn');
+    if (shareReviewLinkBtn) {
+        shareReviewLinkBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card trigger clicks
+            const shareUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?write-testimonial=true`;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                const toast = document.getElementById('toastMessage');
+                if (toast) {
+                    toast.textContent = 'Review link copied to clipboard!';
+                    toast.style.display = 'block';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 3000);
+                }
+            }).catch(err => {
+                console.error('Could not copy link to clipboard:', err);
+                alert(`Copy this link to share: ${shareUrl}`);
+            });
+        });
+    }
+
     // Testimonial submission listener
     const testimonialSubmitForm = document.getElementById('testimonialSubmitForm');
     if (testimonialSubmitForm) {
@@ -736,12 +791,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!name || !text) return;
 
+            const loader = document.getElementById('submitLoader');
+            if (loader) loader.classList.add('active');
+
             try {
-                const res = await fetch(`${API_BASE}/api/testimonials`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, roleCompany, rating, text })
-                });
+                // Submit review and enforce a minimum 1.5s delay for a premium spinner transition
+                const [res] = await Promise.all([
+                    fetch(`${API_BASE}/api/testimonials`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, roleCompany, rating, text })
+                    }),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
 
                 if (res.ok) {
                     showToastHome("Review submitted for admin approval!");
@@ -753,6 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 console.error("Testimonial submit error:", err);
                 showToastHome("Network error submitting review.");
+            } finally {
+                if (loader) loader.classList.remove('active');
             }
         });
     }
@@ -1243,13 +1307,23 @@ document.addEventListener('DOMContentLoaded', () => {
             formSubmitBtn.disabled = true;
             formSubmitBtn.innerHTML = 'Sending Message... <i class="fa-solid fa-circle-notch fa-spin"></i>';
 
+            const loader = document.getElementById('submitLoader');
+            const loaderText = loader ? loader.querySelector('.submit-loader-text') : null;
+            if (loader) {
+                if (loaderText) loaderText.textContent = 'Sending message to inbox...';
+                loader.classList.add('active');
+            }
+
             try {
-                // Post form payload to the backend Messages API
-                const res = await fetch(`${API_BASE}/api/messages`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, subject, message })
-                });
+                // Post form payload to the backend Messages API and enforce a minimum 1.5s delay
+                const [res] = await Promise.all([
+                    fetch(`${API_BASE}/api/messages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, subject, message })
+                    }),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
 
                 if (res.ok) {
                     contactForm.classList.add('hidden');
@@ -1261,6 +1335,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Message send error:", err);
                 alert('Connection error. Failed to reach server inbox.');
             } finally {
+                if (loader) loader.classList.remove('active');
                 formSubmitBtn.disabled = false;
                 formSubmitBtn.innerHTML = 'Send Message <i class="fa-solid fa-paper-plane animate-arrow"></i>';
                 contactForm.reset();
@@ -1272,6 +1347,59 @@ document.addEventListener('DOMContentLoaded', () => {
         resetFormBtn.addEventListener('click', () => {
             successMsg.classList.add('hidden');
             contactForm.classList.remove('hidden');
+        });
+    }
+
+    function initializeSkillsExpandCollapse() {
+        const cards = document.querySelectorAll('.skill-category-card');
+        cards.forEach(card => {
+            if (card.querySelector('.view-more-skills-btn')) return;
+
+            const badgesContainer = card.querySelector('.skill-badges');
+            if (!badgesContainer) return;
+
+            const totalHeight = badgesContainer.scrollHeight;
+            if (totalHeight > 62) {
+                card.classList.add('collapsible-card');
+                badgesContainer.style.maxHeight = '58px';
+
+                const btn = document.createElement('button');
+                btn.className = 'view-more-skills-btn';
+                btn.innerHTML = 'View More <i class="fa-solid fa-chevron-down"></i>';
+
+                const toggleCard = (expand) => {
+                    const isCurrentlyExpanded = card.classList.contains('expanded');
+                    const shouldExpand = (typeof expand === 'boolean') ? expand : !isCurrentlyExpanded;
+
+                    if (shouldExpand) {
+                        card.classList.add('expanded');
+                        badgesContainer.style.maxHeight = 'none';
+                        const currentFullHeight = badgesContainer.scrollHeight;
+                        badgesContainer.style.maxHeight = '58px';
+                        
+                        // Force a reflow
+                        badgesContainer.offsetHeight;
+
+                        badgesContainer.style.maxHeight = currentFullHeight + 'px';
+                        btn.innerHTML = 'View Less <i class="fa-solid fa-chevron-up"></i>';
+                    } else {
+                        card.classList.remove('expanded');
+                        badgesContainer.style.maxHeight = '58px';
+                        btn.innerHTML = 'View More <i class="fa-solid fa-chevron-down"></i>';
+                    }
+                };
+
+                // Add card click listener
+                card.addEventListener('click', () => {
+                    toggleCard();
+                });
+
+                // Add hover listeners for desktop
+                card.addEventListener('mouseenter', () => toggleCard(true));
+                card.addEventListener('mouseleave', () => toggleCard(false));
+
+                card.appendChild(btn);
+            }
         });
     }
 });

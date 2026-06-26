@@ -39,6 +39,8 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 body {
@@ -244,7 +246,7 @@ h1, h2, h3, h4, h5, h6 {
 .nav-link {
     font-family: var(--ff-primary);
     font-weight: 600;
-    font-size: 1.02rem;
+    font-size: 0.8rem;
     color: var(--medium-gray);
     position: relative;
     padding: 6px 0;
@@ -1200,9 +1202,13 @@ h1, h2, h3, h4, h5, h6 {
 .skill-category-card {
     background-color: #ffffff;
     border: 1px solid var(--border-gray);
-    padding: 30px 25px;
-    border-radius: 8px;
+    padding: 20px 16px;
+    border-radius: 12px;
     transition: var(--transition-bounce);
+}
+
+.skill-category-card.collapsible-card {
+    cursor: pointer;
 }
 
 .skill-category-card:hover {
@@ -1212,9 +1218,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .skill-card-icon {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     color: var(--primary-orange);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     transition: var(--transition-bounce);
 }
 
@@ -1223,25 +1229,48 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .skill-category-card h3 {
-    font-size: 1.05rem;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    font-size: 0.92rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--border-gray);
 }
 
 .skill-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.view-more-skills-btn {
+    background: none;
+    border: none;
+    color: var(--primary-orange);
+    font-family: var(--ff-primary);
+    font-weight: 700;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition-smooth);
+}
+
+.view-more-skills-btn:hover {
+    color: var(--hover-orange);
+    transform: translateY(1px);
 }
 
 .skill-badges span {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    padding: 6px 12px;
+    padding: 4px 8px;
     background-color: var(--bg-offset);
     border: 1px solid var(--border-gray);
-    border-radius: 6px;
+    border-radius: 4px;
     color: var(--medium-gray);
     transition: var(--transition-bounce);
 }
@@ -1907,7 +1936,7 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .logo-icon-img {
-        height: 26px;
+        height: 40px;
     }
     
     /* --- Hero --- */
@@ -2091,16 +2120,18 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .skill-category-card {
-        padding: 22px 18px;
+        padding: 16px 14px;
     }
     
     .skill-category-card h3 {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
     }
     
     .skill-badges span {
-        font-size: 0.7rem;
-        padding: 5px 10px;
+        font-size: 0.65rem;
+        padding: 3px 6px;
     }
     
     /* --- Projects --- */
@@ -2265,12 +2296,16 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .logo {
-        font-size: 1.05rem;
+        font-size: 2rem;
         gap: 5px;
     }
     
     .logo-icon-img {
-        height: 22px;
+        height:40px;
+    }
+
+    .logo span{
+        font-size: 30px;
     }
     
     /* --- Hero --- */
@@ -2475,22 +2510,24 @@ h1, h2, h3, h4, h5, h6 {
     
     /* --- Skills --- */
     .skill-category-card {
-        padding: 18px 14px;
+        padding: 12px 10px;
     }
     
     .skill-card-icon {
-        font-size: 1.5rem;
-        margin-bottom: 14px;
+        font-size: 1.2rem;
+        margin-bottom: 8px;
     }
     
     .skill-category-card h3 {
-        font-size: 0.9rem;
-        margin-bottom: 14px;
+        font-size: 0.82rem;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
     }
     
     .skill-badges span {
-        font-size: 0.65rem;
-        padding: 4px 8px;
+        font-size: 0.6rem;
+        padding: 2px 5px;
+        border-radius: 3px;
     }
     
     /* --- Projects --- */
@@ -3438,6 +3475,7 @@ h1, h2, h3, h4, h5, h6 {
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .coding-card:hover {
@@ -3649,14 +3687,32 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 8px;
     padding: 15px;
     overflow-x: auto;
-    display: flex;
-    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    text-align: center;
+    -webkit-overflow-scrolling: touch;
+}
+
+.github-chart-container::-webkit-scrollbar {
+    height: 6px;
+}
+.github-chart-container::-webkit-scrollbar-track {
+    background: var(--bg-offset);
+    border-radius: 10px;
+}
+.github-chart-container::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+.github-chart-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-orange);
 }
 
 .github-chart-img {
     max-width: 100%;
     height: auto;
-    display: block;
+    display: inline-block;
     min-width: 400px;
 }
 
@@ -3701,7 +3757,11 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .coding-card {
+        padding: 20px 15px;
+    }
+
     .leetcode-stats-row {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -3717,15 +3777,130 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .leetcode-footer-metrics {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .leetcode-metric-card {
+        padding: 8px 4px;
+    }
+    
+    .leetcode-metric-val {
+        font-size: 0.85rem;
+    }
+    
+    .leetcode-metric-lbl {
+        font-size: 0.55rem;
+        word-break: break-word;
     }
     
     .github-stats-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .github-stat-card {
+        padding: 8px 4px;
+    }
+    
+    .github-stat-val {
+        font-size: 0.95rem;
+    }
+    
+    .github-stat-lbl {
+        font-size: 0.55rem;
+        word-break: break-word;
     }
 }
 
+/* ====== Extra overrides for Modals on Small Screens ====== */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 24px 16px;
+        border-radius: 12px;
+    }
+    
+    .modal-title {
+        font-size: 1.15rem;
+        margin-bottom: 18px;
+    }
+    
+    .modal-content .form-group {
+        margin-bottom: 14px;
+    }
+    
+    .modal-content .form-control {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .modal-close {
+        top: 12px;
+        right: 15px;
+        font-size: 1.6rem;
+    }
+}
 
+/* --- SUBMIT LOADER OVERLAY --- */
+.submit-loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
+.submit-loader-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.submit-loader-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.submit-loader-spinner {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid var(--light-orange-bg);
+    border-top: 4px solid var(--primary-orange);
+    animation: submit-spin 1s linear infinite;
+}
+
+.submit-loader-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    z-index: 5;
+}
+
+.submit-loader-text {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--dark-charcoal);
+    font-family: var(--ff-primary);
+}
+
+@keyframes submit-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

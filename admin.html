@@ -1013,6 +1013,9 @@
                         <option value="Frontend">Frontend</option>
                         <option value="Backend">Backend</option>
                         <option value="Databases">Databases</option>
+                        <option value="Java Full Stack">Java Full Stack</option>
+                        <option value="Python Full Stack">Python Full Stack</option>
+                        <option value="MERN + GenAI">MERN + GenAI</option>
                         <option value="DevOps & Tools">DevOps & Tools</option>
                         <option value="UI/UX & Design">UI/UX & Design</option>
                         <option value="Engineering">Engineering</option>
@@ -1206,7 +1209,7 @@
     <!-- 4. CORE CONTROLLER SCRIPT (API bindings) -->
     <!-- ========================================== -->
     <script>
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://your-production-backend.onrender.com'; // Relative or configuration
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5050' : 'https://my-portfolio-2026-i0li.onrender.com'; // Relative or configuration
         
         let token = localStorage.getItem('saran_portfolio_jwt');
 
@@ -1217,6 +1220,78 @@
         const loginError = document.getElementById('loginError');
         const statusMessage = document.getElementById('statusMessage');
         const logoutBtn = document.getElementById('logoutBtn');
+
+        // Loader helper functions with request counter for concurrency
+        let activeFetchCount = 0;
+
+        function showAdminLoader(text = 'Processing request...') {
+            const loader = document.getElementById('submitLoader');
+            const loaderText = document.getElementById('submitLoaderText');
+            if (loader) {
+                if (loaderText) loaderText.textContent = text;
+                loader.classList.add('active');
+            }
+        }
+
+        function hideAdminLoader() {
+            if (activeFetchCount <= 0) {
+                const loader = document.getElementById('submitLoader');
+                if (loader) {
+                    loader.classList.remove('active');
+                }
+            }
+        }
+
+        // Global Fetch Interceptor
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const url = args[0] || '';
+            const options = args[1] || {};
+            const method = (options.method || 'GET').toUpperCase();
+            
+            // Determine friendly loader text based on HTTP method and API endpoint
+            let text = 'Processing request...';
+            if (method === 'GET') {
+                if (url.includes('/verify')) text = 'Authenticating credentials...';
+                else if (url.includes('/profile')) text = 'Loading profile data...';
+                else if (url.includes('/stats')) text = 'Loading statistics...';
+                else if (url.includes('/experiences')) text = 'Loading experience timeline...';
+                else if (url.includes('/education')) text = 'Loading education data...';
+                else if (url.includes('/skills')) text = 'Loading skills grid...';
+                else if (url.includes('/projects')) text = 'Loading projects database...';
+                else if (url.includes('/activities')) text = 'Loading feed activities...';
+                else if (url.includes('/messages')) text = 'Loading inbox messages...';
+                else if (url.includes('/testimonials')) text = 'Loading recommendations...';
+                else text = 'Fetching dashboard details...';
+            } else if (method === 'POST') {
+                if (url.includes('/login')) text = 'Verifying login credentials...';
+                else if (url.includes('/testimonials')) text = 'Submitting recommendation review...';
+                else if (url.includes('/activities')) text = 'Publishing activity post...';
+                else text = 'Creating new record...';
+            } else if (method === 'PUT') {
+                if (url.includes('/password')) text = 'Updating account security...';
+                else text = 'Saving updates...';
+            } else if (method === 'DELETE') {
+                text = 'Deleting item...';
+            }
+            
+            activeFetchCount++;
+            showAdminLoader(text);
+            
+            try {
+                // Enforce a tiny visual delay (e.g. 350ms) for extremely fast requests so the spinner is satisfyingly visible
+                const [response] = await Promise.all([
+                    originalFetch(...args),
+                    new Promise(resolve => setTimeout(resolve, 350))
+                ]);
+                return response;
+            } catch (error) {
+                throw error;
+            } finally {
+                activeFetchCount--;
+                hideAdminLoader();
+            }
+        };
 
         // Initial Auth check
         window.addEventListener('DOMContentLoaded', () => {
@@ -1255,7 +1330,6 @@
                 }
             } catch (err) {
                 console.error(err);
-                // offline or local failure
                 showLogin();
             }
         }
@@ -2325,5 +2399,14 @@
             }
         });
     </script>
+
+    <!-- Submission Loader Overlay -->
+    <div class="submit-loader-overlay" id="submitLoader">
+        <div class="submit-loader-wrapper">
+            <div class="submit-loader-spinner"></div>
+            <img src="logo.png" alt="SaranV Logo" class="submit-loader-logo">
+        </div>
+        <div class="submit-loader-text" id="submitLoaderText">Processing request...</div>
+    </div>
 </body>
 </html>

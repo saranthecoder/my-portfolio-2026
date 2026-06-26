@@ -319,7 +319,7 @@
                         <div class="leetcode-footer-metrics">
                             <div class="leetcode-metric-card">
                                 <div class="leetcode-metric-val" id="leetcodeRanking">-</div>
-                                <div class="leetcode-metric-lbl">Global Rank</div>
+                                <div class="leetcode-metric-lbl">Rank</div>
                             </div>
                             <div class="leetcode-metric-card">
                                 <div class="leetcode-metric-val" id="leetcodeAcceptance">-</div>
@@ -327,7 +327,7 @@
                             </div>
                             <div class="leetcode-metric-card">
                                 <div class="leetcode-metric-val" id="leetcodeActiveStreak">-</div>
-                                <div class="leetcode-metric-lbl">Active Streak</div>
+                                <div class="leetcode-metric-lbl">Streak</div>
                             </div>
                         </div>
                     </div>
@@ -351,7 +351,7 @@
                         <div class="github-stats-row">
                             <div class="github-stat-card">
                                 <div class="github-stat-val" id="githubPublicRepos">-</div>
-                                <div class="github-stat-lbl">Repositories</div>
+                                <div class="github-stat-lbl">Repos</div>
                             </div>
                             <div class="github-stat-card">
                                 <div class="github-stat-val" id="githubFollowers">-</div>
@@ -359,7 +359,7 @@
                             </div>
                             <div class="github-stat-card">
                                 <div class="github-stat-val" id="githubGists">-</div>
-                                <div class="github-stat-lbl">Public Gists</div>
+                                <div class="github-stat-lbl">Gists</div>
                             </div>
                         </div>
                     </div>
@@ -704,6 +704,55 @@
                         <span>MongoDB (Aggregation, Indexing)</span>
                         <span>MySQL (Joins, Stored Procedures)</span>
                         <span>Schema Modeling</span>
+                    </div>
+                </div>
+
+                <!-- Skill Card: Java Full Stack -->
+                <div class="skill-category-card scroll-reveal fade-up tilt-target">
+                    <div class="skill-card-icon"><i class="fa-brands fa-java animate-icon"></i></div>
+                    <h3>Java Full Stack</h3>
+                    <div class="skill-badges">
+                        <span>Java (Core & Advanced)</span>
+                        <span>Spring Boot</span>
+                        <span>Spring MVC</span>
+                        <span>Spring Data JPA</span>
+                        <span>Hibernate ORM</span>
+                        <span>Spring Security</span>
+                        <span>Microservices</span>
+                        <span>JUnit / Mockito</span>
+                        <span>Maven & Gradle</span>
+                    </div>
+                </div>
+
+                <!-- Skill Card: Python Full Stack -->
+                <div class="skill-category-card scroll-reveal fade-up tilt-target">
+                    <div class="skill-card-icon"><i class="fa-brands fa-python animate-icon"></i></div>
+                    <h3>Python Full Stack</h3>
+                    <div class="skill-badges">
+                        <span>Python (OOPs)</span>
+                        <span>Django Framework</span>
+                        <span>Flask / FastAPI</span>
+                        <span>SQLAlchemy / ORM</span>
+                        <span>Celery (Async Tasks)</span>
+                        <span>Jinja2 Templates</span>
+                        <span>REST APIs (DRF)</span>
+                        <span>PyTest</span>
+                    </div>
+                </div>
+
+                <!-- Skill Card: MERN + GenAI -->
+                <div class="skill-category-card scroll-reveal fade-up tilt-target">
+                    <div class="skill-card-icon"><i class="fa-solid fa-robot animate-icon"></i></div>
+                    <h3>MERN + GenAI</h3>
+                    <div class="skill-badges">
+                        <span>MERN Stack Integration</span>
+                        <span>LLM Orchestration</span>
+                        <span>LangChain / LlamaIndex</span>
+                        <span>Retrieval-Augmented Gen (RAG)</span>
+                        <span>Vector DBs (Chroma/Pinecone)</span>
+                        <span>OpenAI & Gemini APIs</span>
+                        <span>AI Agent Workflows</span>
+                        <span>Prompt Engineering</span>
                     </div>
                 </div>
 
@@ -1273,8 +1322,9 @@
                 </p>
             </div>
 
-            <div class="write-review-btn-container scroll-reveal fade-up">
+            <div class="write-review-btn-container scroll-reveal fade-up" style="display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 40px;">
                 <button class="btn btn-primary magnetic" onclick="openReviewModal()"><i class="fa-solid fa-pen-nib animate-icon"></i> Write a Testimonial</button>
+                <button class="btn btn-secondary magnetic" id="shareReviewLinkBtn"><i class="fa-solid fa-share-nodes"></i> Share Review Link</button>
             </div>
         </div>
     </section>
@@ -1440,6 +1490,18 @@
             <img src="" id="lightboxImg" alt="Enlarged Post Media">
         </div>
         <button class="lightbox-nav-btn next-btn" id="lightboxNext" onclick="event.stopPropagation(); navigateLightbox(1)" aria-label="Next image"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Share Toast Notification -->
+    <div class="toast" id="toastMessage">Review link copied to clipboard!</div>
+
+    <!-- Submission Loader Overlay -->
+    <div class="submit-loader-overlay" id="submitLoader">
+        <div class="submit-loader-wrapper">
+            <div class="submit-loader-spinner"></div>
+            <img src="logo.png" alt="SaranV Logo" class="submit-loader-logo">
+        </div>
+        <div class="submit-loader-text">Submitting your review...</div>
     </div>
 
     <!-- Main JavaScript -->
